@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { UserContext } from "../../context/UserContext";
+import { UserContext } from "../../Context/UserContext";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import DashboardLayout from "../../Components/layouts/DashboardLayout";
 import ProfilePictureSelector from "../../Components/inputs/ProfilePictureSelector";
@@ -9,7 +9,7 @@ import UserPic from "../../assets/images/User-avatar.svg.png";
 import InputField from "../../Components/inputs/InputsFiled";
 
 const EditProfile = () => {
-  const { user, updateUser } = useContext(UserContext);
+  const { user,updateUser } = useContext(UserContext);
   const [profilePic, setProfilePic] = useState();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,7 +62,7 @@ const EditProfile = () => {
       });
 
       if (response.status === 200) {
-        // updateUser(response.data);
+        updateUser(response.data.user);
         setError('');
         setSuccessMessage("User updated successfully!");
       } else if (response.status === 400) {

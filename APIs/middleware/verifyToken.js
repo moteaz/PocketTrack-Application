@@ -1,6 +1,5 @@
-// /middleware/verifyToken.js
 
-const jwt = require('jsonwebtoken');  // Add this line to import the 'jsonwebtoken' module
+const jwt = require('jsonwebtoken');  
 
 const verifyToken = (req, res, next) => {
   const authHeader  = req.headers['authorization'];

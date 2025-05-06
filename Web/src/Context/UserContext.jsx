@@ -17,13 +17,11 @@ const UserProvider = ({ children }) => {
     // Update user data and save it to local storage
     const updateUser = (userData) => {
         setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData)); // Save user data to localStorage
     };
 
     // Clear user data from state and local storage
     const clearUser = () => {
         setUser(null);
-        localStorage.removeItem("user"); // Remove user data from localStorage
     };
 
     return (

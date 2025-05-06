@@ -5,7 +5,7 @@ import TransactionInfoCard from "../Cards/TransactionInfoCard";
 
 const ExpenseTransactions = ({ transactions, onSeeMore }) => {
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-md shadow-gray-100 border border-gray-200/50">
+        <div className="bg-white p-6 rounded-2xl shadow-md shadow-gray-100 border border-gray-200/50 ">
             <div className="flex items-center justify-between">
                 <h5 className="text-lg">Expenses</h5>
                 <button

@@ -1,5 +1,4 @@
 import React from "react";
-import { LuArrowRight } from "react-icons/lu";
 import moment from "moment";
 import TransactionInfoCard from "../Cards/TransactionInfoCard";
 
@@ -10,7 +9,7 @@ const RecentTransactions = ({ transactions }) => {
         <h5 className="text-lg">Recent Transactions</h5>
       </div>
       <div className="mt-6">
-        {transactions?.slice(0, 8)?.map((item) => (
+        {transactions?.slice(0, 4)?.map((item) => (
           <TransactionInfoCard
           key={`${item.id || item.amount}-${item.date}-${item.type}`} // Ensures a unique key
             title={item.type === "expense" ? item.category : item.source}

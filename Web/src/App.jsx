@@ -6,7 +6,7 @@ import Home from './Pages/Dashboard/Home';
 import Income from './Pages/Dashboard/Income';
 import Expense from './Pages/Dashboard/Expense';
 import EditProfile from './Pages/Dashboard/EditProfile';
-import UserProvider from './context/UserContext';
+import UserProvider from './Context/UserContext';
 import { Toaster } from "react-hot-toast";
 
 const App = () => {
@@ -15,7 +15,7 @@ const App = () => {
     <div>
       <Router>
         <Routes>
-          <Route path='' element={<Root></Root>}/>
+          <Route path='/' element={<Root></Root>}/>
           <Route path='/login' element={<Login/>}></Route>
           <Route path='/signup' element={<SignUp/>}></Route>
           <Route path='/dashboard' element={<Home/>}></Route>

@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { UserContext } from "../../context/UserContext";
+import { UserContext } from "../../Context/UserContext";
 import { SIDE_MENU_DATA } from "../../Utils/Data";
 import { useNavigate } from "react-router-dom";
 import CharAvatar from "../Cards/CharAvatar";

@@ -1,11 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import AuthLayout from "../../Components/layouts/AuthLayout";
 import { useNavigate, Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { validateEmail } from "../../Utils/Helper";
 import axiosInstance from "../../Utils/axiosInstance";
 import { API_PATHS } from "../../Utils/apiPathes";
-import { UserContext } from "../../Context/UserContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +13,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { updateUser } = useContext(UserContext);
+  
 
   const handleLogin = async () => {
     // Prevent default browser behavior
@@ -42,10 +41,8 @@ const Login = () => {
       setLoading(false); // Stop loading when the API request completes
 
       if (response.status === 200) {
-        const { token, user } = response.data;
+        const { token } = response.data; // The Problem Is HERE user is undefined
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user)); // Save user to localStorage
-        updateUser(user); // Update context with the user data
         navigate("/dashboard");
       } else{
         setError(response.data.message)
@@ -62,14 +59,14 @@ const Login = () => {
 
   return (
     <AuthLayout>
-      <div className="lg:w-[60%] h-3/4 md:h-full flex flex-col justify-center">
+      <div className="lg:w-[80%] h-3/4 md:h-full flex flex-col justify-center">
         <h3 className="text-xl font-semibold text-black">Welcome Back</h3>
         <p className="text-xs text-slate-700 mt-1 mb-6">
           Please enter your details to log in
         </p>
 
-        {/* No Form element, only the button */}
-        <div className="flex flex-col gap-4">
+        {/* Form */}
+        <div className="flex flex-col gap-4"> 
           <div className="relative">
             <input
               value={email}
