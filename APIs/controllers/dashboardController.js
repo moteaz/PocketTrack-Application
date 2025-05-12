@@ -97,4 +97,35 @@ const getDashboardData = async (req, res) => {
   }
 };
 
-module.exports = { getDashboardData };
+// Helper functions that can be used by both dashboard and chatbot
+const getFinancialData = async (userId) => {
+  try {
+    // Last 30 days expenses
+    const last30DaysExpenseRes = await pool.query(
+      `SELECT id, icon, category, amount, date
+       FROM expenses
+       WHERE user_id = $1 AND date >= NOW() - INTERVAL '30 days'
+       ORDER BY date DESC`,
+      [userId]
+    );
+    
+    // Last 60 days income
+    const last60DaysIncomeRes = await pool.query(
+      `SELECT id, source, amount, icon, date
+       FROM incomes
+       WHERE user_id = $1 AND date >= NOW() - INTERVAL '60 days'
+       ORDER BY date DESC`,
+      [userId]
+    );
+    
+    return {
+      last30DaysExpenseRes,
+      last60DaysIncomeRes
+    };
+  } catch (error) {
+    console.error('Error getting financial data:', error.message);
+    throw error;
+  }
+};
+
+module.exports = { getDashboardData,getFinancialData};

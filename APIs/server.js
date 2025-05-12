@@ -6,7 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
-
+const chatBotRoutes = require('./routes/chatbotRoutes');
 const app = express();
 const port = 5000;
 
@@ -24,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/expense', expenseRoutes);
 app.use('/api/income', incomeRoutes);
+app.use('/api/chatbot', chatBotRoutes);
 
 app.get('/', (req, res) => {
   res.send('Server is working!');

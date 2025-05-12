@@ -3,6 +3,7 @@ import {
     LuHandCoins,
     LuWalletMinimal,
     LuLogOut,
+    LuBot,
 } from "react-icons/lu";
 import { TbUserEdit } from 'react-icons/tb';
 export const SIDE_MENU_DATA = [
@@ -32,6 +33,12 @@ export const SIDE_MENU_DATA = [
     },
     {
         id: "05",
+        label: "Chatbot",
+        icon: LuBot,
+        path: "/chatbot",
+    },
+    {
+        id: "06",
         label: "Logout",
         icon: LuLogOut,
         path: "/logout",
