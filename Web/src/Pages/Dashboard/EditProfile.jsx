@@ -7,8 +7,10 @@ import { API_PATHS } from "../../Utils/apiPathes";
 import axiosInstance from "../../Utils/axiosInstance";
 import UserPic from "../../assets/images/User-avatar.svg.png";
 import InputField from "../../Components/inputs/InputsFiled";
+import { useUserAuth } from "../../Hooks/useUserAuth";
 
 const EditProfile = () => {
+  useUserAuth();
   const { user,updateUser } = useContext(UserContext);
   const [profilePic, setProfilePic] = useState();
   const [fullName, setFullName] = useState("");

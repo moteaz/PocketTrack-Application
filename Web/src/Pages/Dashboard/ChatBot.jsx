@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import DashboardLayout from "../../Components/layouts/DashboardLayout";
 import axiosInstance from "../../Utils/axiosInstance";
 import { LuSend } from "react-icons/lu";
-import axios from 'axios';
+import { useUserAuth } from "../../Hooks/useUserAuth";
 
 
 const Chatbot = () => {
+  useUserAuth();
   const [messages, setMessages] = useState([
     { sender: "bot", text: "Hello! How can I assist you today?" },
   ]);

@@ -24,6 +24,7 @@ const App = () => {
           <Route path='/expense' element={<Expense/>}></Route>
           <Route path='/edit' element={<EditProfile/>}></Route>
           <Route path='/chatbot' element={<ChatBot/>}></Route>
+          <Route path='*' element={<Navigate to="/dashboard" />} />
         </Routes>
       </Router>
     </div>  
