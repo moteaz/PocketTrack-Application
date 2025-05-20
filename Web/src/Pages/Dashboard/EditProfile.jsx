@@ -130,8 +130,8 @@ const EditProfile = () => {
 
         {/* Main Form Card */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-1 bg-gradient-to-r from-violet-600 to-indigo-600"></div>
-          
+          <div className="p-3 bg-gradient-to-r from-violet-900 to-indigo-700"></div>
+
           <div className="p-6 md:p-8">
             <form onSubmit={handleUpdate} className="space-y-6">
               {/* Profile Picture Section */}
