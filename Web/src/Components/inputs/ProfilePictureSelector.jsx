@@ -79,7 +79,7 @@ const ProfilePictureSelector = ({ onChange }) => {
       <button
         type="button"
         onClick={onChooseFile}
-        className="bg-violet-600 text-white py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-violet-700 transition cursor-pointer"
+        className="bg-violet-600 text-white py-2 px-2 rounded-lg flex items-center gap-2 hover:bg-violet-700 transition cursor-pointer"
       >
         <LuUpload size={18} />
         Choose a Photo

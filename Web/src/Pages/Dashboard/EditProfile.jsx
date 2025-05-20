@@ -135,14 +135,14 @@ const EditProfile = () => {
           <div className="p-6 md:p-8">
             <form onSubmit={handleUpdate} className="space-y-6">
               {/* Profile Picture Section */}
-              <div className="flex flex-col items-center">
+              <div className="flex flex-row items-center justify-between w-1/2 max-w-md mx-auto mb-5">
                 <div className="relative mb-4 group">
                   <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-100 shadow-md bg-gradient-to-br from-violet-50 to-indigo-50 flex items-center justify-center">
                     {user && user.profile_pic ?(
                       <img
                         src={`http://localhost:5000${user.profile_pic}`}
                         alt="Profile"
-                        className="w-full h-full bg-slate-400 rounded-full"
+                        className="w-30 h-30 bg-slate-400 rounded-full"
                       />
                     ) : (
                       <User size={64} className="text-indigo-300" />
@@ -156,8 +156,6 @@ const EditProfile = () => {
                   </div>
                 </div>
                 <ProfilePictureSelector image={profilePic} setImage={setProfilePic} onChange={handleImageChange}  />
-                <h3 className="text-lg font-medium text-gray-800">{user?.fullname || "Your Name"}</h3>
-                <p className="text-sm text-gray-500">{user?.email || "your.email@example.com"}</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
