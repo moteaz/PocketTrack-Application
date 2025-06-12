@@ -1,12 +1,9 @@
-// controllers/authController.js
+
 
 // Importing pool from config/db
 const pool = require('../config/db');  // No need to redeclare the pool using 'new Pool()'
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
 
 // Function to hash the password (assuming it's defined somewhere)
 const hashPassword = async (password) => {

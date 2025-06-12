@@ -193,7 +193,7 @@ const Chatbot = () => {
                 disabled={loading}
                 className={`p-3 rounded-full ${
                   input.trim() 
-                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white" 
+                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 cursor-pointer" 
                     : "bg-gray-200 text-gray-400"
                 } transition-all duration-200 flex items-center justify-center`}
                 aria-label="Send message"
