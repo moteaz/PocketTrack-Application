@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import DashboardLayout from "../../Components/layouts/DashboardLayout";
-import axiosInstance from "../../Utils/axiosInstance";
 import { useUserAuth } from "../../Hooks/useUserAuth";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, Square } from "lucide-react";
+import { UserContext } from "../../Context/UserContext";
 
 const Chatbot = () => {
   useUserAuth();
+  const { user } = useContext(UserContext);
   const [messages, setMessages] = useState([
     { 
       sender: "bot", 
@@ -15,6 +16,7 @@ const Chatbot = () => {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [abortController, setAbortController] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -29,58 +31,95 @@ const Chatbot = () => {
 
   const getBotResponse = async (userInput) => {
     setLoading(true);
-
+    const controller = new AbortController();
+    setAbortController(controller);
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text: "",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
     try {
-      const response = await axiosInstance.post(
-        "http://localhost:5000/api/chatbot",
-        { prompt: userInput },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-          timeout: 200000,
-        }
-      );
-
-      const botReply = response.data.response || "No response from server.";
-      
-      setMessages((prev) => [
-        ...prev, 
-        { 
-          sender: "bot", 
-          text: botReply,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-    } catch (error) {
-      console.error("API error:", error);
-      setMessages((prev) => [
-        ...prev,
-        { 
-          sender: "bot", 
-          text: "Sorry, something went wrong. Please try again later.",
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/chatbot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
-      ]);
+        body: JSON.stringify({ prompt: userInput }),
+        credentials: 'include',
+        signal: controller.signal,
+      });
+      if (!response.body) throw new Error("No response body");
+      const reader = response.body.getReader();
+      let botText = "";
+      let done = false;
+      let decoder = new TextDecoder();
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          const chunks = decoder.decode(value).split('\n\n');
+          for (const chunk of chunks) {
+            const clean = chunk.replace(/^data: /, '').trim();
+            if (!clean) continue;
+            try {
+              const json = JSON.parse(clean);
+              if (json.response) {
+                botText += json.response;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1].text = botText;
+                  return updated;
+                });
+              }
+            } catch {
+              // Ignore non-JSON chunks
+            }
+          }
+        }
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1].text = "Response stopped by user.";
+          return updated;
+        });
+      } else {
+        console.error("API error:", error);
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1].text = "Sorry, something went wrong. Please try again later.";
+          return updated;
+        });
+      }
     } finally {
       setLoading(false);
+      setAbortController(null);
     }
   };
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
     const userMessage = { 
       sender: "user", 
       text: input.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    
     await getBotResponse(input.trim());
+  };
+
+  const handleStop = () => {
+    if (abortController) {
+      abortController.abort();
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -139,8 +178,16 @@ const Chatbot = () => {
                   
                   {msg.sender === "user" && (
                     <div className="self-end mb-2 ml-2">
-                      <div className="bg-indigo-100 p-1 rounded-full">
-                        <User className="text-indigo-600 w-5 h-5" />
+                      <div className="bg-indigo-100 p-1 rounded-full w-8 h-8 flex items-center justify-center overflow-hidden">
+                        {user && user.profile_pic ? (
+                          <img
+                            src={`http://localhost:5000${user.profile_pic}`}
+                            alt="User"
+                            className="w-5 h-5 rounded-full object-cover"
+                          />
+                        ) : (
+                          <User className="text-indigo-600 w-5 h-5" />
+                        )}
                       </div>
                     </div>
                   )}
@@ -188,22 +235,29 @@ const Chatbot = () => {
                 disabled={loading}
                 aria-label="Message input"
               />
-              <button
-                type="submit"
-                disabled={loading}
-                className={`p-3 rounded-full ${
-                  input.trim() 
-                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 cursor-pointer" 
-                    : "bg-gray-200 text-gray-400"
-                } transition-all duration-200 flex items-center justify-center`}
-                aria-label="Send message"
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
+              {loading ? (
+                <button
+                  type="button"
+                  onClick={handleStop}
+                  className="p-3 rounded-full bg-violet-600 text-white hover:bg-violet-700 cursor-pointer transition-all duration-200 flex items-center justify-center ml-2"
+                  aria-label="Stop response"
+                >
+                  <Square className="w-5 h-5" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`p-3 rounded-full ${
+                    input.trim() 
+                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 cursor-pointer" 
+                      : "bg-gray-200 text-gray-400"
+                  } transition-all duration-200 flex items-center justify-center ml-2`}
+                  aria-label="Send message"
+                >
                   <Send className="w-5 h-5" />
-                )}
-              </button>
+                </button>
+              )}
             </form>
           </div>
         </div>

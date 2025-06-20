@@ -84,12 +84,27 @@ const getBotResponse = async (req, res) => {
         body: JSON.stringify({
           model: "llama3",
           prompt: aiPrompt,
-          stream: false,
+          stream: true,
         }),
       });
 
-      const data = await response.json();
-      res.json({ response: data.response || "No response from the server" });
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      response.body.on('data', (chunk) => {
+        res.write(`data: ${chunk.toString()}\n\n`);
+      });
+
+      response.body.on('end', () => {
+        res.write('data: [END]\n\n');
+        res.end();
+      });
+
+      response.body.on('error', (err) => {
+        res.write(`data: [ERROR] ${err.message}\n\n`);
+        res.end();
+      });
     } catch (fetchError) {
       if (fetchError.name === 'AbortError') {
         return res.status(504).json({ message: 'AI API request timed out' });
