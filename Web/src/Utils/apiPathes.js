@@ -1,27 +1,25 @@
-
-
 export const BASE_URL = "http://127.0.0.1:5000";
 
 export const API_PATHS = {
     AUTH: {
         LOGIN: "/api/auth/login",
-        REGISTER: "/api/auth/signup",
+        REGISTER: "/api/auth/",
         GET_USER_INFO: "/api/auth/user",
-        UPDATE_USER: "/api/auth/edit",
+        UPDATE_USER: "/api/auth/",
     },
     DASHBOARD: {
         GET_DATA: "/api/dashboard/",
     },
     INCOME: {
-        ADD_INCOME: "/api/income/add",
+        ADD_INCOME: "/api/income/",
         GET_INCOMES: "/api/income/",
-        DELETE_INCOME: (incomeID) => `/api/income/delete/${incomeID}`,
+        DELETE_INCOME: (incomeID) => `/api/income/${incomeID}`,
         DOWNLOAD_INCOME: "/api/income/download",
     },
     EXPENSE: {
-        ADD_EXPENSE: "/api/expense/add",
+        ADD_EXPENSE: "/api/expense/",
         GET_EXPENSES: "/api/expense/",
-        DELETE_EXPENSE: (expenseID) => `/api/expense/delete/${expenseID}`,
+        DELETE_EXPENSE: (expenseID) => `/api/expense/${expenseID}`,
         DOWNLOAD_EXPENSE: "/api/expense/download",
     },
     IMAGE:{

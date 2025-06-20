@@ -2,15 +2,35 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/verifyToken');
 const { addIncomeController, getIncomesController, deleteIncomeController, getIncomesForExcelController } = require('../controllers/incomeController');
+const { body, param, validationResult } = require('express-validator');
+
+const addIncomeValidation = [
+  body('source').isString().notEmpty().withMessage('Source is required'),
+  body('amount').isFloat({ gt: 0 }).withMessage('Amount must be a positive number'),
+  body('icon').optional().isString(),
+  body('date').isISO8601().withMessage('Date must be a valid ISO8601 date'),
+];
+
+const deleteIncomeValidation = [
+  param('incomeId').isInt().withMessage('Income ID must be an integer'),
+];
+
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
 
 // Add an income
-router.post('/add', verifyToken, async (req, res) => {
+router.post('/', verifyToken, addIncomeValidation, validate, async (req, res) => {
   const { source, amount, icon, date } = req.body;
   try {
     const income = await addIncomeController(req.userId, source, amount, icon, date);
     res.status(201).json({ message: 'Income added successfully!', income });
   } catch (error) {
-    res.status(500).json({ message: 'Error adding expense', error: error.message });
+    res.status(500).json({ message: 'Error adding income', error: error.message });
   }
 });
 
@@ -20,12 +40,12 @@ router.get('/', verifyToken, async (req, res) => {
     const incomes = await getIncomesController(req.userId);
     res.status(200).json(incomes);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching expenses', error: error.message });
+    res.status(500).json({ message: 'Error fetching incomes', error: error.message });
   }
 });
 
 // Delete an income
-router.delete('/delete/:incomeId', verifyToken, async (req, res) => {
+router.delete('/:incomeId', verifyToken, deleteIncomeValidation, validate, async (req, res) => {
   const { incomeId } = req.params;
   try {
     const deletedIncome = await deleteIncomeController(incomeId, req.userId);

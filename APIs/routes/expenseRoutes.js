@@ -2,9 +2,29 @@ const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/verifyToken');
 const { addExpenseController, getExpensesController, deleteExpenseController, getExpensesForExcelController } = require('../controllers/expenseController');
+const { body, param, validationResult } = require('express-validator');
+
+const addExpenseValidation = [
+  body('category').isString().notEmpty().withMessage('Category is required'),
+  body('amount').isFloat({ gt: 0 }).withMessage('Amount must be a positive number'),
+  body('icon').optional().isString(),
+  body('date').isISO8601().withMessage('Date must be a valid ISO8601 date'),
+];
+
+const deleteExpenseValidation = [
+  param('expenseId').isInt().withMessage('Expense ID must be an integer'),
+];
+
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
 
 // Add an expense
-router.post('/add', verifyToken, async (req, res) => {
+router.post('/', verifyToken, addExpenseValidation, validate, async (req, res) => {
   const { category, amount, icon, date } = req.body;
   try {
     const expense = await addExpenseController(req.userId, category, amount, icon, date);
@@ -25,7 +45,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Delete an expense
-router.delete('/delete/:expenseId', verifyToken, async (req, res) => {
+router.delete('/:expenseId', verifyToken, deleteExpenseValidation, validate, async (req, res) => {
   const { expenseId } = req.params;
   try {
     const deletedExpense = await deleteExpenseController(expenseId, req.userId);
