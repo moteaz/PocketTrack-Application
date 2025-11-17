@@ -1,42 +1,42 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateIncomeDto } from './dto/create-income.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { GetIncomesQueryDto } from './dto/query-income.dto';
+import { CreateExpenseDto } from './dto/create-expense.dto';
+import { GetExpenseQueryDto } from './dto/query-expense.dto';
 
 @Injectable()
-export class IncomeService {
+export class ExpenseService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createIncomeDto: CreateIncomeDto, userId: number) {
+  async create(createExpenseDto: CreateExpenseDto, userId: number) {
     const data = {
-      ...createIncomeDto,
-      icon: createIncomeDto.icon ?? '💰', // default icon if missing
+      ...createExpenseDto,
+      icon: createExpenseDto.icon ?? '💰', // default icon if missing
       userId,
     };
-    return this.prisma.income.create({
+    return this.prisma.expense.create({
       data,
     });
   }
 
-  async deleteIncomeById(incomeId: number, userId: number) {
+  async deleteExpenseById(expenseId: number, userId: number) {
     try {
-      return await this.prisma.income.delete({
+      return await this.prisma.expense.delete({
         where: {
-          id: incomeId,
-          userId: userId, // Ensures ownership at DB level
+          id: expenseId,
+          userId: userId,
         },
       });
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(
-          'Income not found or you do not have permission to delete it',
+          'Expense not found or you do not have permission to delete it',
         );
       }
       throw error;
     }
   }
 
-  async getAllIncomes(userId: number, query: GetIncomesQueryDto) {
+  async getAllExpenses(userId: number, query: GetExpenseQueryDto) {
     const { page = 1, limit = 10, startDate, endDate } = query;
 
     const where = {
@@ -51,15 +51,16 @@ export class IncomeService {
         : {}),
     };
 
-    const [data, total, totalAmountIncomes] = await Promise.all([
-      this.prisma.income.findMany({
+    const [data, total, totalAmountExpenses] = await Promise.all([
+      this.prisma.expense.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { date: 'desc' },
       }),
-      this.prisma.income.count({ where }),
-      this.prisma.income.aggregate({
+      this.prisma.expense.count({ where }),
+      this.prisma.expense.aggregate({
+        where,
         _sum: {
           amount: true,
         },
@@ -73,7 +74,7 @@ export class IncomeService {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
-        totalAmountIncomes: totalAmountIncomes._sum.amount || 0,
+        totalAmount: totalAmountExpenses._sum.amount || 0,
       },
     };
   }

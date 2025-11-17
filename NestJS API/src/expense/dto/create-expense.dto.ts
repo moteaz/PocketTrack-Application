@@ -5,20 +5,18 @@ import {
   MaxLength,
   IsDate,
   IsOptional,
-  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateIncomeDto {
+export class CreateExpenseDto {
   @IsNumber()
   @IsNotEmpty()
-  @Min(0.01, { message: 'Amount must be greater than 0' })
   amount: number;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(25)
-  source: string;
+  category: string;
   @IsString()
   @IsOptional()
   icon?: string;
