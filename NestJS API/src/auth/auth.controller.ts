@@ -7,50 +7,28 @@ import {
   UseGuards,
   Get,
   Put,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateUserDto } from './dto/update.user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import * as fs from 'fs';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorator/get-user.decorator';
+import { createMulterOptions } from '../config/multer.config';
+import { CleanupUploadInterceptor } from '../common/interceptors/cleanup-upload.interceptor';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-
   @Post('register')
   @UseInterceptors(
-    FileInterceptor('profilePic', {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = './uploads';
-          if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-        },
-      }),
-      limits: { fileSize: 2 * 1024 * 1024 },
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
-          return cb(new Error('Only image files are allowed!'), false);
-        }
-        cb(null, true);
-      },
-    }),
+    FileInterceptor('profilePic', createMulterOptions()),
+    new CleanupUploadInterceptor(),
   )
   async register(
-    @Body() dto: RegisterDto,
+    @Body(new ValidationPipe({ transform: true })) dto: RegisterDto,
     @UploadedFile() profilePic?: Express.Multer.File,
   ) {
     const profilePicPath = profilePic ? profilePic.filename : undefined;
@@ -71,38 +49,15 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Put('me')
   @UseInterceptors(
-    FileInterceptor('profilePic', {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = './uploads';
-          if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-        },
-      }),
-      limits: { fileSize: 2 * 1024 * 1024 },
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
-          return cb(new Error('Only image files are allowed!'), false);
-        }
-        cb(null, true);
-      },
-    }),
+    FileInterceptor('profilePic', createMulterOptions()),
+    new CleanupUploadInterceptor(),
   )
   async updateProfile(
     @GetUser('id') userId: number,
-    @Body() dto: Partial<RegisterDto>,
+    @Body(new ValidationPipe({ transform: true })) dto: UpdateUserDto,
     @UploadedFile() profilePic?: Express.Multer.File,
   ) {
     const profilePicPath = profilePic ? profilePic.filename : undefined;
-
     return this.authService.updateUser(userId, {
       ...dto,
       profilePic: profilePicPath,

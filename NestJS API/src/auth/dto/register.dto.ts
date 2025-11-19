@@ -11,7 +11,7 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(2, { message: 'Full name must be at least 2 characters' })
-  @MaxLength(10, { message: 'Full name must be at most 10 characters' })
+  @MaxLength(18, { message: 'Full name must be at most 18 characters' })
   @Transform(({ value }) => value?.trim())
   fullName: string;
 
