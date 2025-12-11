@@ -1,41 +1,67 @@
-require('dotenv').config();  // Ensure dotenv is loaded at the top
+require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
 const chatBotRoutes = require('./routes/chatbotRoutes');
-const rateLimit = require('express-rate-limit');
+const errorHandler = require('./middleware/errorHandler');
+const { RATE_LIMIT } = require('./utils/constants');
+
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
-// CORS middleware configuration
+// Security middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
+
+// CORS configuration
 const corsOptions = {
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',  // Configurable React app URL
-  credentials: true,               // Allow credentials (cookies, authorization headers)
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  credentials: true,
 };
-app.use(cors(corsOptions));  
-app.use(express.json());  
+app.use(cors(corsOptions));
 
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: RATE_LIMIT.WINDOW_MS,
+  max: RATE_LIMIT.MAX_REQUESTS,
+  message: 'Too many requests from this IP, please try again later.',
+});
+app.use('/api/', limiter);
+
+// Body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/api/auth', authRoutes); 
+
+// Routes
+app.get('/', (req, res) => {
+  res.json({ message: 'PocketTrack API is running', version: '1.0.0' });
+});
+
+app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/expense', expenseRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/chatbot', chatBotRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Server is working!');
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal Server Error' });
-});
+// Centralized error handler (must be last)
+app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`🚀 Server running on port ${port}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 });

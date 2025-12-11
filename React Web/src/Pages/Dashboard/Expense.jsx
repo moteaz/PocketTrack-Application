@@ -33,7 +33,7 @@ const Expense = () => {
             `${API_PATHS.EXPENSE.GET_EXPENSES}`
         );
         if (response.data) {
-          setExpenseData(response.data);
+          setExpenseData(response.data.data); 
         }
     } catch (error) {
         console.error("Something went wrong. Please try again.", error.message, error.response?.data);

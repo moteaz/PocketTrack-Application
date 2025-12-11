@@ -1,48 +1,34 @@
-const { addIncome, getIncomes, deleteIncome, getIncomesForExcel } = require('../models/Income');
+const incomeService = require('../services/incomeService');
+const excelService = require('../services/excelService');
+const ApiResponse = require('../utils/responses/ApiResponse');
+const asyncHandler = require('../middleware/asyncHandler');
 
-// Add expense controller
-const addIncomeController = async (userId, source, amount, icon, date) => {
-  try {
-    const income = await addIncome(userId, source, amount, icon, date);
-    return income;
-  } catch (error) {
-    throw error;
+const addIncome = asyncHandler(async (req, res) => {
+  const { source, amount, icon, date } = req.body;
+  const income = await incomeService.addIncome(req.userId, source, amount, icon, date);
+  ApiResponse.created(res, { income }, 'Income added successfully');
+});
+
+const getIncomes = asyncHandler(async (req, res) => {
+  const incomes = await incomeService.getIncomes(req.userId);
+  ApiResponse.success(res, incomes);
+});
+
+const deleteIncome = asyncHandler(async (req, res) => {
+  const { incomeId } = req.params;
+  const deletedIncome = await incomeService.deleteIncome(incomeId, req.userId);
+  
+  if (!deletedIncome) {
+    return ApiResponse.notFound(res, 'Income not found');
   }
-};
+  ApiResponse.success(res, null, 'Income deleted successfully');
+});
 
-// Get incomes controller
-const getIncomesController = async (userId) => {
-  try {
-    const incomes = await getIncomes(userId);
-    return incomes;
-  } catch (error) {
-    throw error;
-  }
-};
+const downloadIncomes = asyncHandler(async (req, res) => {
+  const incomes = await incomeService.getIncomes(req.userId);
+  const fileBuffer = excelService.generateExcelBuffer(incomes, 'Incomes');
+  excelService.setExcelHeaders(res, 'incomes.xlsx');
+  res.send(fileBuffer);
+});
 
-// Delete income controller
-const deleteIncomeController = async (incomeId, userId) => {
-  try {
-    const income = await deleteIncome(incomeId, userId);
-    return income;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Get incomes for Excel export
-const getIncomesForExcelController = async (userId) => {
-  try {
-    const incomes = await getIncomesForExcel(userId);
-    return incomes;
-  } catch (error) {
-    throw error;
-  }
-};
-
-module.exports = {
-  addIncomeController,
-  getIncomesController,
-  deleteIncomeController,
-  getIncomesForExcelController,
-};
+module.exports = { addIncome, getIncomes, deleteIncome, downloadIncomes };

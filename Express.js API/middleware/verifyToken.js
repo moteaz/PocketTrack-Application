@@ -1,21 +1,23 @@
 
-const jwt = require('jsonwebtoken');  
+const jwt = require('jsonwebtoken');
+const { HTTP_STATUS } = require('../utils/constants');
+const ApiError = require('../utils/responses/ApiError');
 
 const verifyToken = (req, res, next) => {
-  const authHeader  = req.headers['authorization'];
+  const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(403).json({ message: 'Access denied, no token provided' });
+    return next(new ApiError('Access denied, no token provided', HTTP_STATUS.FORBIDDEN));
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Invalid or expired token' });
-    }
-    req.userId = decoded.userId;  // Store the user ID from the token payload
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
     next();
-  });
+  } catch (err) {
+    return next(new ApiError('Invalid or expired token', HTTP_STATUS.UNAUTHORIZED));
+  }
 };
 
 module.exports = verifyToken;

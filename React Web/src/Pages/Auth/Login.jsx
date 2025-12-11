@@ -41,7 +41,7 @@ const Login = () => {
       setLoading(false); // Stop loading when the API request completes
 
       if (response.status === 200) {
-        const { token } = response.data; // The Problem Is HERE user is undefined
+        const { token } = response.data.data; 
         localStorage.setItem("token", token);
         navigate("/dashboard");
       } else{

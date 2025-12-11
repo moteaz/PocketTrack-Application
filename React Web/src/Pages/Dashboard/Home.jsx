@@ -32,7 +32,7 @@ const fetchDashboardData = async () => {
             `${API_PATHS.DASHBOARD.GET_DATA}`
         );
         if (response.data) {
-            setDashboardData(response.data);
+            setDashboardData(response.data.data); 
         }
     } catch (error) {
         console.error("Something went wrong. Please try again.", error.message, error.response?.data);
@@ -82,12 +82,12 @@ return (
         />
 
         <ExpenseTransactions
-        transactions={dashboardData?.last30daysExpense.transaction}
+        transactions={dashboardData?.last30daysExpense?.transaction}
         onSeeMore={() => navigate("/expense")}
         />
 
         <Last30DaysExpenses
-        data={dashboardData?.last30daysExpense.transaction}
+        data={dashboardData?.last30daysExpense?.transaction}
         />
         
         <RecentIncomeWithChart 

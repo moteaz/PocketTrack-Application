@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   NotFoundException,
   InternalServerErrorException,
+  Module,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
@@ -12,6 +13,9 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'prisma/prisma.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { ExpenseModule } from 'src/expense/expense.module';
+import { IncomeModule } from 'src/income/income.module';
+import { AuthModule } from './auth.module';
 
 // ============================================
 // LRU CACHE IMPLEMENTATION
@@ -332,3 +336,9 @@ export class AuthService {
     this.userCache.clear();
   }
 }
+@Module({
+  imports: [AuthModule, IncomeModule, ExpenseModule],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}

@@ -77,7 +77,7 @@ const EditProfile = () => {
       });
 
       if (response.status === 200) {
-        updateUser(response.data.user);
+        updateUser(response.data.data.user); 
         setError('');
         setSuccessMessage("Your profile has been updated successfully!");
         setPassword("");

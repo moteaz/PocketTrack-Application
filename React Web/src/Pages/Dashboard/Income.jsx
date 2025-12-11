@@ -33,7 +33,7 @@ const Income = () => {
             `${API_PATHS.INCOME.GET_INCOMES}`
         );
         if (response.data) {
-          setIncomeData(response.data);
+          setIncomeData(response.data.data); 
         }
     } catch (error) {
         console.error("Something went wrong. Please try again.", error.message, error.response?.data);

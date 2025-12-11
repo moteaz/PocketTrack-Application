@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './auth/auth.service';
 import { ValidationPipe } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
